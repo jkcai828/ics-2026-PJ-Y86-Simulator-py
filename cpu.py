@@ -221,18 +221,23 @@ class Y86Simulator:
             a = self.to_signed64(self.valA)
             b = self.to_signed64(self.valB)
             if self.ifun == 0:  # addq
-                signed_result = a + b
+                raw_result = a + b
+                self.valE = self.uint64(raw_result)
+                signed_result = self.to_signed64(self.valE)
                 of = (a >= 0 and b >= 0 and signed_result < 0) or (a < 0 and b < 0 and signed_result >= 0)
             elif self.ifun == 1:  # subq
-                signed_result = b - a
+                raw_result = b - a
+                self.valE = self.uint64(raw_result)
+                signed_result = self.to_signed64(self.valE)
                 of = (b >= 0 and a < 0 and signed_result < 0) or (b < 0 and a >= 0 and signed_result >= 0)
             elif self.ifun == 2:  # andq
-                signed_result = self.to_signed64(self.valA & self.valB)
+                self.valE = self.uint64(self.valA & self.valB)
+                signed_result = self.to_signed64(self.valE)
                 of = False
             else:  # xorq
-                signed_result = self.to_signed64(self.valA ^ self.valB)
+                self.valE = self.uint64(self.valA ^ self.valB)
+                signed_result = self.to_signed64(self.valE)
                 of = False
-            self.valE = self.uint64(signed_result)
             self.CC = {"ZF": int(self.valE == 0), "SF": int(self.to_signed64(self.valE) < 0), "OF": int(of)}
         elif self.icode in (I_PUSHQ, I_CALL):
             self.valE = self.uint64(self.valB - 8)
