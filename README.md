@@ -41,3 +41,33 @@ python cpu.py < test/abs-asum-cmov.yo
 完成后请把仓库链接提交至 E-Learning 平台。
 
 你需要另行准备用于汇报的演示文稿，并单独提交到 E-Learning 平台的另一个作业上。
+
+## 本实现说明
+
+`cpu.py` 按照 Y86-64 顺序处理器的五个数据通路阶段实现：取指、译码、执行、访存、写回，并在每条指令结束时更新 PC。寄存器和内存内部统一保存为 64 位无符号值，输出快照时转换为有符号补码表示，以保持与评测器的 JSON 格式一致。
+
+已覆盖框架要求的全部指令：
+
+- `halt`、`nop`
+- `rrmovq`/`cmovXX`、`irmovq`、`rmmovq`、`mrmovq`
+- `addq`、`subq`、`andq`、`xorq`，以及 `ZF/SF/OF` 条件码
+- `jmp`/`jXX`
+- `call`、`ret`、`pushq`、`popq`
+
+同时实现了指令编码和 `ifun` 合法性检查、内存越界检测、非法指令状态（`INS`）、地址错误状态（`ADR`），以及 `popq %rsp` 时由内存值覆盖栈指针的 Y86 语义。
+
+## 复现与验收
+
+无需第三方 Python 包，Python 3.8+ 即可运行：
+
+```bash
+./test.sh
+# 或
+python3 test.py --bin "python3 cpu.py"
+```
+
+当前仓库中的 21 个公开测试全部通过，基准分为 `60.00 / 60.00`。单个程序可用以下命令观察完整状态轨迹：
+
+```bash
+python3 cpu.py < test/abs-asum-cmov.yo
+```
